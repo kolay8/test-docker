@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Меню{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated and user.is_staff %}
+        <p>
+            <a href="{% url 'dishes_manage' %}">Керувати стравами</a> |
+            <a href="{% url 'ingredient_list' %}">Керувати інгредієнтами</a>
+        </p>
+    {% endif %}
+
+    <div style="border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+        <h1 style="font-size: 2rem; margin: 0 0 10px 0;">Наше меню</h1>
+        <ul class="nav nav-tabs">
+            {% for category in categories %}
+                <li class="nav-item">
+                    <button class="nav-link {% if forloop.first %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-{{ category.name|slugify }}" type="button">
+                        {{ category.name }}
+                    </button>
+                </li>
+            {% empty %}
+                <li class="nav-item">
+                    <span class="nav-link disabled">Немає категорій</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="tab-content">
+        {% for category in categories %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ category.name|slugify }}">
+                <h3>{{ category.name }}</h3>
+                <ul>
+                    {% for item in category.dishes.all %}
+                        <li>
+                            <strong><a href="{% url 'detail' item.pk %}">{{ item.name }}</a></strong> - ₴{{ item.price }}
+                            {% if user.is_authenticated and user.is_staff %}
+                                <a href="{% url 'dish_update' item.pk %}">[редагувати]</a>
+                                <a href="{% url 'dish_delete' item.pk %}">[видалити]</a>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li>У цій категорії поки немає страв.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+    <h2>
+        {{ item.name }}
+        <span>- ₴{{ item.price }}</span>
+    </h2>
+    
+    <p>{{ item.description }}</p>
+    <p>Інгредієнти:
+        {% if item.ingredients.exists %}
+            <ul>
+                {% for ingredient in item.ingredients.all %}
+                    <li>{{ ingredient.name }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            none
+        {% endif %}
+    </p>
+    {% if user.is_authenticated and user.is_staff %}
+        <p>
+            <a href="{% url 'dish_update' item.pk %}">Редагувати страву</a> |
+            <a href="{% url 'dish_delete' item.pk %}">Видалити страву</a>
+        </p>
+    {% endif %}
+    <p><a href="{% url 'menu' %}">Назад</a></p>
+{% endblock %}

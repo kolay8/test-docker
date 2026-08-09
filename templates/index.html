@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Головна{% endblock %}
+
+{% block content %}
+    <section class="home-page">
+        <h2>Ласкаво просимо до нашого ресторану</h2>
+        <a href="{% url 'menu' %}" class="btn btn-outline-dark">Меню</a>
+    </section>
+{% endblock %}

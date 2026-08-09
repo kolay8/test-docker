@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Керування стравами{% endblock %}
+
+{% block content %}
+    <h2>Керування стравами</h2>
+    <p>
+        <a href="{% url 'dish_create' %}">Додати нову страву</a> |
+        <a href="{% url 'menu' %}">Назад до меню</a>
+    </p>
+
+    <ul>
+        {% for dish in dishes %}
+            <li>
+                <strong><a href="{% url 'detail' dish.pk %}">{{ dish.name }}</a></strong> - ₴{{ dish.price }}
+                {% if dish.category %}
+                    ({{ dish.category.name }})
+                {% endif %}
+                <a href="{% url 'dish_update' dish.pk %}">[редагувати]</a>
+                <a href="{% url 'dish_delete' dish.pk %}">[видалити]</a>
+            </li>
+        {% empty %}
+            <li>Немає страв.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
