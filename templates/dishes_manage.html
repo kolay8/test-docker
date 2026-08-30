@@ -3,24 +3,63 @@
 {% block title %}Керування стравами{% endblock %}
 
 {% block content %}
-    <h2>Керування стравами</h2>
-    <p>
-        <a href="{% url 'dish_create' %}">Додати нову страву</a> |
-        <a href="{% url 'menu' %}">Назад до меню</a>
-    </p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0">Керування стравами</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dish_create' %}" class="btn btn-success">+ Додати нову страву</a>
+            <a href="{% url 'menu' %}" class="btn btn-outline-secondary">Назад до меню</a>
+        </div>
+    </div>
 
-    <ul>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
         {% for dish in dishes %}
-            <li>
-                <strong><a href="{% url 'detail' dish.pk %}">{{ dish.name }}</a></strong> - ₴{{ dish.price }}
-                {% if dish.category %}
-                    ({{ dish.category.name }})
-                {% endif %}
-                <a href="{% url 'dish_update' dish.pk %}">[редагувати]</a>
-                <a href="{% url 'dish_delete' dish.pk %}">[видалити]</a>
-            </li>
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    {% if dish.image %}
+                        <img src="{{ dish.image.url }}" class="card-img-top object-fit-cover rounded-top" alt="{{ dish.name }}" style="height: 180px;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted rounded-top" style="height: 180px;">
+                            <div class="text-center">
+                                <span class="d-block fs-2">🍽️</span>
+                                <span class="small">Немає фото</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0 fs-6">
+                                <a href="{% url 'detail' dish.pk %}" class="text-decoration-none text-dark fw-bold">{{ dish.name }}</a>
+                            </h5>
+                            <div class="text-end">
+                                <span class="badge bg-success">₴{{ dish.price }}</span>
+                                {% if dish.weight %}
+                                    <small class="d-block text-muted">{{ dish.weight }} г</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if dish.category %}
+                            <div class="mb-2">
+                                <span class="badge bg-light text-secondary border">{{ dish.category.name }}</span>
+                            </div>
+                        {% endif %}
+                        {% if dish.description %}
+                            <p class="card-text text-muted small flex-grow-1">{{ dish.description|truncatewords:10 }}</p>
+                        {% else %}
+                            <p class="card-text text-muted small flex-grow-1"></p>
+                        {% endif %}
+                        <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                            <a href="{% url 'dish_update' dish.pk %}" class="btn btn-sm btn-outline-secondary w-50">Редагувати</a>
+                            <a href="{% url 'dish_delete' dish.pk %}" class="btn btn-sm btn-outline-danger w-50">Видалити</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% empty %}
-            <li>Немає страв.</li>
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Немає жодної страви. <a href="{% url 'dish_create' %}" class="alert-link">Додати першу страву</a>.
+                </div>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

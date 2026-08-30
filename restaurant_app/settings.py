@@ -117,3 +117,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'menu.backends.PhoneOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Redirects for auth views
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/profile/'
+LOGOUT_REDIRECT_URL = '/'

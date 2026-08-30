@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Керування категоріями{% endblock %}
+
+{% block content %}
+    <h1>Керування категоріями</h1>
+    <p><a href="{% url 'menu' %}">назад</a> | <a href="{% url 'category_create' %}">Додати категорію</a></p>
+    <ul>
+        {% for category in categories %}
+            <li>
+                {{ category.name }}
+                    <a href="{% url 'category_update' category.pk %}">[редагувати]</a>
+                    <a href="{% url 'category_delete' category.pk %}">[видалити]</a>
+            </li>
+        {% empty %}
+            <li>Немає категорій.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

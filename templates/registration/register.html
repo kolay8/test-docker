@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Реєстрація{% endblock %}
+
+{% block content %}
+    <h1>Реєстрація</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            {% if field.name != 'phone' %}
+                <p>{{ field.errors }}{{ field.label_tag }} {{ field }}</p>
+            {% endif %}
+        {% endfor %}
+        <p>
+            {{ form.phone.errors }}
+            <label for="id_phone_local">Телефон:</label>
+            <span>+380</span>
+            <input type="tel" id="id_phone_local" class="form-control d-inline-block w-auto" inputmode="numeric" placeholder="(XX) XXX-XX-XX" maxlength="14" required>
+            {{ form.phone.as_hidden }}
+        </p>
+        <p><button type="submit" class="btn btn-primary">Зареєструватись</button></p>
+    </form>
+    <p>Вже маєте обліковий запис? <a href="{% url 'login' %}">Увійти</a></p>
+    <script>
+        const phoneInput = document.getElementById('id_phone_local');
+        const phoneHiddenInput = document.getElementById('id_phone');
+
+        function formatPhone(digits) {
+            let formatted = '';
+            if (digits.length > 0) formatted += `(${digits.slice(0, 2)}`;
+            if (digits.length >= 2) formatted += ')';
+            if (digits.length > 2) formatted += ` ${digits.slice(2, 5)}`;
+            if (digits.length > 5) formatted += `-${digits.slice(5, 7)}`;
+            if (digits.length > 7) formatted += `-${digits.slice(7, 9)}`;
+            return formatted;
+        }
+
+        function syncPhone(digits, cursorDigits = null) {
+            digits = digits.replace(/\D/g, '').slice(0, 9);
+            phoneInput.value = formatPhone(digits);
+            phoneHiddenInput.value = digits.length === 9 ? `+380 ${phoneInput.value}` : '';
+
+            if (cursorDigits === null) return;
+            let position = 0;
+            for (let seen = 0; seen < cursorDigits; position++) {
+                if (/\d/.test(phoneInput.value[position])) seen++;
+            }
+            phoneInput.setSelectionRange(position, position);
+        }
+
+        phoneInput.addEventListener('keydown', (event) => {
+            const cursor = phoneInput.selectionStart;
+            if (event.key !== 'Backspace' || cursor !== phoneInput.selectionEnd ||
+                cursor === 0 || /\d/.test(phoneInput.value[cursor - 1])) return;
+
+            event.preventDefault();
+            const digitsBefore = phoneInput.value.slice(0, cursor).replace(/\D/g, '');
+            const digits = phoneInput.value.replace(/\D/g, '');
+            syncPhone(digits.slice(0, digitsBefore.length - 1) + digits.slice(digitsBefore.length), digitsBefore.length - 1);
+        });
+
+        phoneInput.addEventListener('input', () => syncPhone(phoneInput.value));
+
+        if (phoneHiddenInput.value) {
+            let digits = phoneHiddenInput.value.replace(/\D/g, '');
+            if (digits.startsWith('380')) digits = digits.slice(3);
+            else if (digits.startsWith('0')) digits = digits.slice(1);
+            syncPhone(digits);
+        }
+    </script>
+{% endblock %}

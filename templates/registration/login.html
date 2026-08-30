@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+    <h1>Вхід</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p><button type="submit" class="btn btn-primary">Увійти</button></p>
+    </form>
+
+    <p class="text-muted small">
+        Можна увійти за допомогою нікнейму або номера телефону.<br>
+        Формат телефону: +380 (XX) XXX-XX-XX, 0XX XXX-XX-XX або просто 9 цифр.
+    </p>
+    <p>Не маєте облікового запису? <a href="{% url 'register' %}">Зареєструватись</a></p>
+{% endblock %}

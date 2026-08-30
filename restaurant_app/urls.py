@@ -15,21 +15,35 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from menu import views as menu_views
+from menu.forms import LoginForm
+from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', menu_views.index, name='home'),
     path('menu/', menu_views.menu_page, name='menu'),
     path('manage-dishes/', menu_views.dishes_manage, name='dishes_manage'),
+    path('manage-categories/', menu_views.categories_manage, name='categories_manage'),
+    path('categories/new/', menu_views.category_create, name='category_create'),
+    path('categories/<int:pk>/edit/', menu_views.category_update, name='category_update'),
+    path('categories/<int:pk>/delete/', menu_views.category_delete, name='category_delete'),
     path('about/', menu_views.about_page, name='about'),
+    path('profile/', menu_views.profile, name='profile'),
+    path('login/', auth_views.LoginView.as_view(authentication_form=LoginForm), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('register/', menu_views.register, name='register'),
+    path('accounts/login/', auth_views.LoginView.as_view(authentication_form=LoginForm)),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('dish/<int:pk>/', menu_views.detail, name='detail'),
     path('dish/new/', menu_views.dish_create, name='dish_create'),
     path('dish/<int:pk>/edit/', menu_views.dish_update, name='dish_update'),
     path('dish/<int:pk>/delete/', menu_views.dish_delete, name='dish_delete'),
-    path('ingredients/', menu_views.ingredient_list, name='ingredient_list'),
-    path('ingredients/new/', menu_views.ingredient_create, name='ingredient_create'),
-    path('ingredients/<int:pk>/edit/', menu_views.ingredient_update, name='ingredient_update'),
-    path('ingredients/<int:pk>/delete/', menu_views.ingredient_delete, name='ingredient_delete'),
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Профіль{% endblock %}
+
+{% block content %}
+    <h1>Профіль</h1>
+    {% if user.is_authenticated %}
+        <p>Ви увійшли як <strong>{{ request.user.username }}</strong></p>
+        <p>Телефон: <strong>{{ profile.phone }}</strong></p>
+        <form method="post" action="{% url 'logout' %}" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link">Вийти</button>
+        </form>
+    {% else %}
+        <p>Ви не увійшли.</p>
+        <p><a href="{% url 'login' %}">Увійти</a> | <a href="{% url 'register' %}">Зареєструватись</a></p>
+    {% endif %}
+{% endblock %}
