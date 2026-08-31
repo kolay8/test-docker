@@ -24,7 +24,7 @@
                         <a class="nav-link" href="{% url 'about' %}">Про наш ресторан</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'profile' %}">{% if user.is_authenticated %}<strong>{{ user.username }}{% else %}Профіль</strong>{% endif %}</a>
+                        <a class="nav-link" href="{% url 'profile' %}">{% if user.is_authenticated %}<strong>{{ user.username }}</strong>{% else %}Профіль{% endif %}</a>
                     </li>
                 </ul>
             </div>
