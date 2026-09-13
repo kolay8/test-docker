@@ -3,17 +3,29 @@
 {% block title %}Керування категоріями{% endblock %}
 
 {% block content %}
-    <h1>Керування категоріями</h1>
-    <p><a href="{% url 'menu' %}">назад</a> | <a href="{% url 'category_create' %}">Додати категорію</a></p>
-    <ul>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0">Керування категоріями</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'category_create' %}" class="btn btn-success">+ Додати категорію</a>
+        <a href="{% url 'menu' %}" class="btn btn-outline-secondary">Назад до меню</a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <ul class="list-group list-group-flush">
         {% for category in categories %}
-            <li>
-                {{ category.name }}
-                    <a href="{% url 'category_update' category.pk %}">[редагувати]</a>
-                    <a href="{% url 'category_delete' category.pk %}">[видалити]</a>
-            </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+            <span class="fw-medium">{{ category.name }}</span>
+            <div class="btn-group btn-group-sm">
+                <a href="{% url 'category_update' category.pk %}" class="btn btn-outline-secondary">Редагувати</a>
+                <a href="{% url 'category_delete' category.pk %}" class="btn btn-outline-danger">Видалити</a>
+            </div>
+        </li>
         {% empty %}
-            <li>Немає категорій.</li>
+        <li class="list-group-item text-muted text-center py-4">
+            Немає категорій. <a href="{% url 'category_create' %}">Додати першу</a>.
+        </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}

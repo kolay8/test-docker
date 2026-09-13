@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Замовлення{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Замовлення клієнтів</h1>
+{% for order in orders %}
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
+        <strong>Замовлення #{{ order.pk }}</strong>
+        <span class="text-muted small">{{ order.created_at|date:'d.m.Y H:i' }}</span>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <p class="mb-1"><strong>Клієнт:</strong> {{ order.user.username }}</p>
+                <p class="mb-1"><strong>Телефон:</strong> {{ order.phone }}</p>
+                <p class="mb-1"><strong>Отримання:</strong> {{ order.get_delivery_method_display }}</p>
+                {% if order.delivery_address %}<p class="mb-1"><strong>Адреса:</strong> {{ order.delivery_address }}</p>{% endif %}
+                <p class="mb-1"><strong>Оплата:</strong> {{ order.payment_method }}</p>
+            </div>
+            <div class="col-md-4">
+                <strong>Страви:</strong>
+                <ul class="mb-0">
+                    {% for item in order.items.all %}
+                    <li>{{ item.dish_name }} x {{ item.quantity }}: ₴{{ item.subtotal }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <p class="mb-1">Страви: ₴{{ order.subtotal }}</p>
+                <p class="mb-1">Доставка: ₴{{ order.delivery_fee }}</p>
+                <p class="fs-5 mb-3"><strong>Разом: ₴{{ order.total }}</strong></p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id" value="{{ order.pk }}">
+                    <label for="status-{{ order.pk }}" class="form-label small">Статус</label>
+                    <div class="d-flex gap-2">
+                        <select id="status-{{ order.pk }}" name="status" class="form-select form-select-sm">
+                            {% for value, label in order.STATUSES %}
+                            <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Зберегти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-light border">Замовлень поки немає.</div>
+{% endfor %}
+{% endblock %}

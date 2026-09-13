@@ -1,29 +1,27 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from .models import Profile
-from .forms import normalize_phone, format_canonical_phone
+from .forms import format_canonical_phone
 
 
 class PhoneOrUsernameBackend(ModelBackend):
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        if username is None:
-            username = kwargs.get('username') or kwargs.get('phone')
+        username = username or kwargs.get('username') or kwargs.get('phone')
         if not username or not password:
             return None
 
-        phone_digits = normalize_phone(username)
-        if phone_digits:
-            canonical_phone = format_canonical_phone(phone_digits)
+        user = None
+        canonical_phone = format_canonical_phone(username)
+        if canonical_phone:
             profile = Profile.objects.filter(phone=canonical_phone).select_related('user').first()
-            if profile and profile.user.check_password(password) and self.user_can_authenticate(profile.user):
-                return profile.user
+            if profile:
+                user = profile.user
 
-        try:
-            user = User.objects.get(username__iexact=username)
-            if user.check_password(password) and self.user_can_authenticate(user):
-                return user
-        except User.DoesNotExist:
-            return None
+        if user is None:
+            user = User.objects.filter(username__iexact=username).first()
+
+        if user and user.check_password(password) and self.user_can_authenticate(user):
+            return user
 
         return None

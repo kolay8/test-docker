@@ -1,9 +1,8 @@
 from django import forms
-from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Dish, Category, Profile
+from .models import Dish, Category, Order, Profile
 
 
 def normalize_phone(value):
@@ -12,16 +11,12 @@ def normalize_phone(value):
         return digits[3:]
     if digits.startswith('0') and len(digits) == 10:
         return digits[1:]
-    if len(digits) == 9:
-        return digits
-    return None
+    return digits if len(digits) == 9 else None
 
 
-def format_canonical_phone(digits_or_value):
-    digits = normalize_phone(digits_or_value) if (len(digits_or_value or '') != 9 or not digits_or_value.isdigit()) else digits_or_value
-    if digits and len(digits) == 9:
-        return f'+380 ({digits[:2]}) {digits[2:5]}-{digits[5:7]}-{digits[7:9]}'
-    return None
+def format_canonical_phone(value):
+    digits = normalize_phone(value)
+    return f'+380 ({digits[:2]}) {digits[2:5]}-{digits[5:7]}-{digits[7:9]}' if digits else None
 
 
 class DishForm(forms.ModelForm):
@@ -55,22 +50,94 @@ class CategoryForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['phone']
+        fields = ['phone', 'delivery_address']
+        labels = {
+            'phone': 'Телефон',
+            'delivery_address': 'Адреса доставки',
+        }
+        widgets = {
+            'delivery_address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Вулиця, будинок, квартира, місто',
+                'autocomplete': 'street-address',
+            }),
+        }
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if not phone:
             return ''
-        digits = normalize_phone(phone)
-        if not digits:
+        normalized = format_canonical_phone(phone)
+        if not normalized:
             raise forms.ValidationError('Введіть номер у форматі +380 (XX) XXX-XX-XX, 0XX XXX-XX-XX або 9 цифр.')
-        normalized = format_canonical_phone(digits)
         query = Profile.objects.filter(phone=normalized)
         if self.instance and self.instance.pk:
             query = query.exclude(pk=self.instance.pk)
         if query.exists():
             raise forms.ValidationError('Цей номер телефону вже використовується.')
         return normalized
+
+
+class DeliveryAddressForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['delivery_address']
+        labels = {
+            'delivery_address': 'Адреса доставки',
+        }
+        widgets = {
+            'delivery_address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Вулиця, будинок, квартира, місто',
+                'autocomplete': 'street-address',
+            }),
+        }
+
+
+class OrderForm(forms.ModelForm):
+    delivery_method = forms.ChoiceField(
+        label='Спосіб отримання',
+        choices=Order.DELIVERY_METHODS,
+        widget=forms.RadioSelect,
+    )
+
+    class Meta:
+        model = Order
+        fields = ['phone', 'delivery_method', 'delivery_address']
+        labels = {
+            'phone': 'Номер телефону',
+            'delivery_method': 'Спосіб отримання',
+            'delivery_address': 'Адреса доставки',
+        }
+        widgets = {
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'type': 'tel'}),
+            'delivery_address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Вулиця, будинок, квартира, місто',
+                'autocomplete': 'street-address',
+            }),
+        }
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        normalized = format_canonical_phone(phone)
+        if not normalized:
+            raise forms.ValidationError('Введіть коректний номер телефону.')
+        return normalized
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('delivery_method') == Order.DELIVERY and not cleaned_data.get('delivery_address'):
+            self.add_error('delivery_address', 'Вкажіть адресу доставки.')
+        return cleaned_data
+
+
+class OrderStatusForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['status']
+        labels = {'status': 'Статус'}
+        widgets = {'status': forms.Select(attrs={'class': 'form-select form-select-sm'})}
 
 
 class LoginForm(AuthenticationForm):
@@ -81,20 +148,6 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Нікнейм або +380 (XX) XXX-XX-XX',
         }),
     )
-
-    def clean(self):
-        identifier = self.cleaned_data.get('username')
-        password = self.cleaned_data.get('password')
-        if identifier and password:
-            self.user_cache = authenticate(
-                self.request,
-                username=identifier,
-                password=password,
-            )
-            if self.user_cache is None:
-                raise self.get_invalid_login_error()
-            self.confirm_login_allowed(self.user_cache)
-        return self.cleaned_data
 
 
 class RegisterForm(UserCreationForm):
@@ -113,10 +166,9 @@ class RegisterForm(UserCreationForm):
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        digits = normalize_phone(phone)
-        if not digits:
+        normalized = format_canonical_phone(phone)
+        if not normalized:
             raise forms.ValidationError('Введіть номер у форматі +380 (XX) XXX-XX-XX, 0XX XXX-XX-XX або 9 цифр.')
-        normalized = format_canonical_phone(digits)
         if Profile.objects.filter(phone=normalized).exists():
             raise forms.ValidationError('Цей номер телефону вже використовується. Будь ласка, введіть унікальний номер.')
         return normalized

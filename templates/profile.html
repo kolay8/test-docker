@@ -3,16 +3,34 @@
 {% block title %}Профіль{% endblock %}
 
 {% block content %}
-    <h1>Профіль</h1>
-    {% if user.is_authenticated %}
-        <p>Ви увійшли як <strong>{{ request.user.username }}</strong></p>
-        <p>Телефон: <strong>{{ profile.phone }}</strong></p>
-        <form method="post" action="{% url 'logout' %}" class="mt-2">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-link">Вийти</button>
-        </form>
-    {% else %}
-        <p>Ви не увійшли.</p>
-        <p><a href="{% url 'login' %}">Увійти</a> | <a href="{% url 'register' %}">Зареєструватись</a></p>
-    {% endif %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0 fs-5">Особистий профіль</h4>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                    <p class="mb-2">Користувач: <strong>{{ user.username }}</strong></p>
+                    <p class="mb-3">Телефон: <strong>{{ profile.phone|default:'Не вказано' }}</strong></p>
+                    <p class="mb-2">Адреса доставки:</p>
+                    <p class="mb-3"><strong>{{ profile.delivery_address|default:'Не вказано' }}</strong></p>
+                    <a href="{% url 'profile_address' %}" class="btn btn-outline-primary btn-sm mb-3">
+                        {% if profile.delivery_address %}Редагувати адресу{% else %}Додати адресу{% endif %}
+                    </a>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Вийти з акаунта</button>
+                    </form>
+                {% else %}
+                    <p class="text-muted mb-3">Ви не увійшли в систему.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'login' %}" class="btn btn-primary">Увійти</a>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary">Зареєструватись</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

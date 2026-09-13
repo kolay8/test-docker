@@ -6,3 +6,61 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
+
+.menu-category {
+  scroll-margin-top: 1rem;
+}
+
+.menu-category:not(:last-child) {
+  margin-bottom: 5rem;
+}
+
+.menu-scroll {
+  max-height: min(72vh, 900px);
+  overflow-y: auto;
+  padding-right: 0.75rem;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.dish-card-image {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.dish-text-area {
+  min-height: 6rem;
+}
+
+.dish-description {
+  height: 2.4rem;
+  line-height: 1.2rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 1000px) {
+  .dish-card {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .dish-card-image {
+    flex: 0 0 30%;
+    width: 30%;
+    height: 150px;
+    align-self: stretch;
+  }
+
+  .dish-card .card-body {
+    width: 70%;
+  }
+
+  .dish-text-area {
+    min-height: 0;
+  }
+}
+

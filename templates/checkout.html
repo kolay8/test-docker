@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Оформлення замовлення{% endblock %}
+
+{% block content %}
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h2 mb-4">Оформлення замовлення</h1>
+        <form method="post" class="card shadow-sm border-0">
+            {% csrf_token %}
+            <div class="card-body">
+                {{ form.non_field_errors }}
+                <div class="mb-3">
+                    {{ form.phone.label_tag }}
+                    <p class="form-control-plaintext fw-semibold mb-0">{{ form.phone.value|default:user.profile.phone }}</p>
+                    <input type="hidden" name="phone" value="{{ form.phone.value|default:user.profile.phone }}">
+                    {% for error in form.phone.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <fieldset class="mb-3">
+                    <legend class="fs-6">{{ form.delivery_method.label }}</legend>
+                    {% for radio in form.delivery_method %}
+                    <div class="form-check mb-2">
+                        {{ radio.tag }}
+                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                    </div>
+                    {% endfor %}
+                    {% for error in form.delivery_method.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </fieldset>
+                <div class="mb-3">
+                    {{ form.delivery_address.label_tag }}
+                    {{ form.delivery_address }}
+                    <div class="form-text">Для самовивозу адресу вказувати не потрібно.</div>
+                    {% for error in form.delivery_address.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="border-top pt-3 mt-4">
+                    <p class="mb-1">Оплата: <strong>при отриманні</strong></p>
+                    <button type="submit" class="btn btn-success w-100 mt-3">Підтвердити замовлення</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header"><strong>Ваше замовлення</strong></div>
+            <div class="card-body">
+                {% for dish in dishes %}
+                <div class="d-flex justify-content-between gap-3 mb-2">
+                    <span>{{ dish.name }} x {{ dish.quantity }}</span>
+                    <strong>₴{{ dish.subtotal }}</strong>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between"><span>Сума страв</span><strong>₴{{ subtotal }}</strong></div>
+                <div class="d-flex justify-content-between"><span>Доставка</span><strong id="checkout-delivery-fee">₴100.00</strong></div>
+                <div class="d-flex justify-content-between mt-2 fs-5"><span>Разом</span><strong id="checkout-total">₴{{ delivery_total }}</strong></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const deliveryMethodInputs = document.querySelectorAll('input[name="delivery_method"]');
+    const deliveryFeeElement = document.getElementById('checkout-delivery-fee');
+    const checkoutTotalElement = document.getElementById('checkout-total');
+    const subtotal = Number('{{ subtotal }}');
+    const deliveryFee = 100;
+
+    function updateCheckoutTotal() {
+        const isDelivery = document.querySelector('input[name="delivery_method"]:checked')?.value === 'delivery';
+        const fee = isDelivery ? deliveryFee : 0;
+        deliveryFeeElement.textContent = `₴${fee.toFixed(2)}`;
+        checkoutTotalElement.textContent = `₴${(subtotal + fee).toFixed(2)}`;
+    }
+
+    deliveryMethodInputs.forEach((input) => input.addEventListener('change', updateCheckoutTotal));
+    updateCheckoutTotal();
+</script>
+{% endblock %}

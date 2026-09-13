@@ -3,10 +3,21 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <h2>{{ title }} «{{ object_name }}»?</h2>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Так, видалити</button>
-        <a href="{{ cancel_url }}" class="btn btn-secondary">Ні</a>
-    </form>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0 fs-5">{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Ви впевнені, що хочете видалити <strong>«{{ object_name }}»</strong>?</p>
+                <form method="post" class="d-flex justify-content-end gap-2">
+                    {% csrf_token %}
+                    <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Скасувати</a>
+                    <button type="submit" class="btn btn-danger">Так, видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

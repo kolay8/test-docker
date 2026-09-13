@@ -44,11 +44,7 @@
                     <span class="badge bg-light text-secondary border">{{ dish.category.name }}</span>
                 </div>
                 {% endif %}
-                {% if dish.description %}
-                <p class="card-text text-muted small flex-grow-1">{{ dish.description|truncatewords:10 }}</p>
-                {% else %}
-                <p class="card-text text-muted small flex-grow-1"></p>
-                {% endif %}
+                <p class="card-text text-muted small flex-grow-1">{{ dish.description|default:''|truncatewords:10 }}</p>
                 <div class="d-flex gap-2 mt-3 pt-2 border-top">
                     <a href="{% url 'dish_update' dish.pk %}"
                         class="btn btn-sm btn-outline-secondary w-50">Редагувати</a>
